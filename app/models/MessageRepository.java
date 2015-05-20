@@ -3,6 +3,7 @@ package models;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -38,6 +39,7 @@ public class MessageRepository {
 	 *             if an error occurred in the underlying datastore
 	 */
 	public void persist(JsonNode message) throws RepositoryException {
+		Objects.requireNonNull(message, "Message must not be null.");
 		try (Jedis j = pool.getResource()) {
 			String key = MESSAGE_PREFIX + UUID.randomUUID().toString();
 			// save message using random key
