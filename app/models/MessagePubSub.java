@@ -1,20 +1,30 @@
 package models;
 
+import java.util.Objects;
+
 import play.Logger;
 import play.libs.Json;
 import redis.clients.jedis.JedisPubSub;
 
+/**
+ * Redis pub/sub listener implementation.
+ * 
+ * @author zstorok
+ *
+ */
 public final class MessagePubSub extends JedisPubSub {
-	
-	private final MessageRepository messageRepository;
 
-	public MessagePubSub(MessageRepository messageRepository) {
-		this.messageRepository = messageRepository;
+	private final MessageRepository messageRepository;
+	private final String channel;
+
+	public MessagePubSub(MessageRepository messageRepository, String channel) {
+		this.channel = Objects.requireNonNull(channel, "Channel name must not be null");
+		this.messageRepository = Objects.requireNonNull(messageRepository, "Message repository must not be null.");
 	}
-	
+
 	@Override
 	public void onMessage(String channel, String messageBody) {
-		if (!channel.equals(Constants.CHANNEL_NAME)) {
+		if (!channel.equals(this.channel)) {
 			return;
 		}
 		try {

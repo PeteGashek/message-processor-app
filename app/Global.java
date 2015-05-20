@@ -17,7 +17,7 @@ public class Global extends GlobalSettings {
 
 	public void onStart(Application app) {
 		JedisPool pool = play.Play.application().plugin(RedisPlugin.class).jedisPool();
-		messagePubSub = new MessagePubSub(new MessageRepository(pool));
+		messagePubSub = new MessagePubSub(new MessageRepository(pool), Constants.CHANNEL_NAME);
 		Akka.system().scheduler().scheduleOnce(Duration.Zero(), new Runnable() {
 			@Override
 			public void run() {
