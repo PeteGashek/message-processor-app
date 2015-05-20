@@ -27,7 +27,7 @@ public class MessageRepository {
 	private JedisPool pool;
 
 	public MessageRepository(JedisPool pool) {
-		this.pool = pool;
+		this.pool = Objects.requireNonNull(pool, "Pool must not be null.");
 	}
 
 	/**
