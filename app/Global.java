@@ -1,6 +1,7 @@
 import models.Constants;
 import models.MessagePubSub;
 import models.MessageRepository;
+import models.WebSocketSenderSupervisor;
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
@@ -16,6 +17,7 @@ public class Global extends GlobalSettings {
 	private MessagePubSub messagePubSub;
 
 	public void onStart(Application app) {
+		// initialize Redis listener
 		JedisPool pool = play.Play.application().plugin(RedisPlugin.class).jedisPool();
 		messagePubSub = new MessagePubSub(new MessageRepository(pool), Constants.CHANNEL_NAME);
 		Akka.system().scheduler().scheduleOnce(Duration.Zero(), new Runnable() {
@@ -27,6 +29,8 @@ public class Global extends GlobalSettings {
 				}
 			}
 		}, Akka.system().dispatcher());
+		// initialize sender supervisor actor
+		Akka.system().actorOf(WebSocketSenderSupervisor.props(), Constants.SUPERVISOR_ACTOR_NAME);
         Logger.info("Application has started");
     }
 
