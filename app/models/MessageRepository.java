@@ -40,7 +40,8 @@ public class MessageRepository {
 	 */
 	public void persist(JsonNode message) throws RepositoryException {
 		Objects.requireNonNull(message, "Message must not be null.");
-		try (Jedis j = pool.getResource()) {
+		Jedis j = pool.getResource();
+		try {
 			String key = MESSAGE_PREFIX + UUID.randomUUID().toString();
 			// save message using random key
 			j.set(key, Json.stringify(message));
@@ -48,6 +49,8 @@ public class MessageRepository {
 			j.sadd(MESSAGE_KEY_SET, key);
 		} catch (JedisException e) {
 			throw new RepositoryException("Error when persisting message.", e);
+		} finally {
+			pool.returnResource(j);
 		}
 	}
 
@@ -59,7 +62,8 @@ public class MessageRepository {
 	 *             if an error occurred in the underlying datastore
 	 */
 	public List<JsonNode> findAll() throws RepositoryException {
-		try (Jedis j = pool.getResource()) {
+		Jedis j = pool.getResource();
+		try {
 			List<JsonNode> messages = new ArrayList<JsonNode>();
 			Set<String> keys = j.smembers(MESSAGE_KEY_SET);
 			if (keys.isEmpty()) {
@@ -74,6 +78,8 @@ public class MessageRepository {
 			return messages;
 		} catch (JedisException e) {
 			throw new RepositoryException("Error when retrieving messages.", e);
+		} finally {
+			pool.returnResource(j);
 		}
 	}
 }

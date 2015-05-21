@@ -1,3 +1,5 @@
+import java.util.concurrent.TimeUnit;
+
 import models.Constants;
 import models.MessagePubSub;
 import models.MessageRepository;
@@ -20,12 +22,15 @@ public class Global extends GlobalSettings {
 		// initialize Redis listener
 		JedisPool pool = play.Play.application().plugin(RedisPlugin.class).jedisPool();
 		messagePubSub = new MessagePubSub(new MessageRepository(pool), Constants.CHANNEL_NAME);
-		Akka.system().scheduler().scheduleOnce(Duration.Zero(), new Runnable() {
+		Akka.system().scheduler().scheduleOnce(Duration.create(10, TimeUnit.MILLISECONDS), new Runnable() {
 			@Override
 			public void run() {
-				try (Jedis j = pool.getResource()) {
+				Jedis j = pool.getResource();
+				try {
 					Logger.info("Subscribing to messages channel.");
 					j.subscribe(messagePubSub, Constants.CHANNEL_NAME);
+				} finally {
+					pool.returnResource(j);
 				}
 			}
 		}, Akka.system().dispatcher());

@@ -18,8 +18,11 @@ public class MessagePublisher {
 	
 	public void publish(JsonNode message) {
 		Objects.requireNonNull(message, "Message must not be null.");
-		try (Jedis jedis = pool.getResource()) {
+		Jedis jedis = pool.getResource();
+		try {
 			jedis.publish(Constants.CHANNEL_NAME, Json.stringify(message));
+		} finally {
+			pool.returnResource(jedis);
 		}
 	}
 }
