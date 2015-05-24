@@ -1,5 +1,7 @@
 package models;
 
+import java.util.Objects;
+
 import play.mvc.WebSocket;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
@@ -19,7 +21,7 @@ public class WebSocketSender extends UntypedActor {
     private final WebSocket.Out<JsonNode> socket;
 
     public WebSocketSender(WebSocket.Out<JsonNode> socket) {
-        this.socket = socket;
+        this.socket = Objects.requireNonNull(socket, "Socket must not be null.");
     }
     
     public void onReceive(Object message) throws Exception {
