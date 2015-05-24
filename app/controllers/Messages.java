@@ -3,7 +3,7 @@ package controllers;
 import java.util.List;
 
 import models.Constants;
-import models.MessagePublisher;
+import models.RedisPublisher;
 import models.MessageRepository;
 import models.RepositoryException;
 import play.libs.Akka;
@@ -31,8 +31,8 @@ public class Messages extends Controller {
 		}
 		// publish on Redis channel
 		JedisPool pool = play.Play.application().plugin(RedisPlugin.class).jedisPool();
-		MessagePublisher messagePublisher = new MessagePublisher(pool);
-		messagePublisher.publish(message);
+		ActorRef publisher = Akka.system().actorOf(RedisPublisher.props(pool));
+		publisher.tell(message, ActorRef.noSender());
 		
 		// send message to connected Websocket clients via the supervisor actor
 		ActorSelection supervisor = Akka.system().actorSelection(Constants.SUPERVISOR_ACTOR_PATH);
